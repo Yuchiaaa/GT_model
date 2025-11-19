@@ -17,7 +17,7 @@ def decimal_to_base_k(n, k):
     digits = []
     while n > 0:
         digits.append(n % k)
-        n //= k
+        n //= kx
     
     return digits[::-1]
 
