@@ -21,6 +21,8 @@ def decimal_to_base_k(n, k):
     
     return digits[::-1]
 
+# A dictionary to hold different strategies for the experiments
+strategies = {}
 
 class CASim(Model):
     def __init__(self):
