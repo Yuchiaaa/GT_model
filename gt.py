@@ -17,12 +17,16 @@ def decimal_to_base_k(n, k):
     digits = []
     while n > 0:
         digits.append(n % k)
-        n //= kx
+        n //= k
     
     return digits[::-1]
 
 # A dictionary to hold different strategies for the experiments
-strategies = {}
+strategies = {
+    
+    
+    
+}
 
 class CASim(Model):
     def __init__(self):
