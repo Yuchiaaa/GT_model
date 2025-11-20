@@ -5,176 +5,262 @@ import matplotlib.pyplot as plt
 from pyics import Model
 
 
-def decimal_to_base_k(n, k):
-    """Converts a given decimal (i.e. base-10 integer) to a list containing the
-    base-k equivalant.
-
-    For example, for n=34 and k=3 this function should return [1, 0, 2, 1]."""
-    
-    if n == 0:
-        return [0]
-    
-    digits = []
-    while n > 0:
-        digits.append(n % k)
-        n //= k
-    
-    return digits[::-1]
-
-# A dictionary to hold different strategies for the experiments
 strategies = {
-    "s1": ,
-    "s2": ,
-    "s3": ,
-    
-    
-    
+    "TitForTat": [0, 0, 1, 0, 1],
+    "AllC": [0, 0, 0, 0, 0],    
+    "AllD": [1, 1, 1, 1, 1],     
+    "Random": [random.randint(0, 1) for _ in range(5)], 
+    "s1": [0, 1, 0, 1, 0], 
+    "s2": [1, 0, 1, 0, 1], 
 }
 
-def payoff(a_choice, b_choice):
+def get_next_move(strategy_gene, own_history, opp_history):
     """
-    0 for C, 1 for D
-    return A's payoff
+    based on strategy_gene and history, return next move (0=C, 1=D)
     """
-    payoff_table = {
-        (0, 0): 3,
-        (0, 1): 0,
-        (1, 0): 5,
-        (1, 1): 1
-    }
     
-    return payoff_table[(a_choice, b_choice)]
+    # initial move
+    if not own_history:
+        return strategy_gene[0]
+    
+    # get last moves
+    own_prev = own_history[-1]
+    opp_prev = opp_history[-1]
 
-class CASim(Model):
+    # map history to index
+    # (0, 0) -> 1
+    # (0, 1) -> 2
+    # (1, 0) -> 3
+    # (1, 1) -> 4
+    history_index = own_prev * 2 + opp_prev + 1
+    
+    return strategy_gene[history_index]
+
+def RunRepeatedPrisonerDilemma(strategy_a, strategy_b, repetitions, payoff_table):
+    """
+    run repeated prisoner's dilemma between two strategies
+    """
+    
+    a_history = []
+    b_history = []
+    a_score = 0
+    b_score = 0
+    
+    for _ in range(repetitions):
+        # make choices
+        a_choice = get_next_move(strategy_a, a_history, b_history)
+        b_choice = get_next_move(strategy_b, b_history, a_history)
+        
+        # get payoffs
+        score_a = payoff_table[(a_choice, b_choice)]
+        score_b = payoff_table[(b_choice, a_choice)]
+        
+        a_score += score_a
+        b_score += score_b
+        
+        # update history
+        a_history.append(a_choice)
+        b_history.append(b_choice)
+        
+    return a_score, b_score
+
+class EvolutionSim(Model):
     def __init__(self):
         Model.__init__(self)
 
-        self.t = 0
-        self.rule_set = []
-        self.config = None
+        self.generation = 0
+        self.population = []
+        self.history_scores = []
 
-        self.make_param('r', 1)
-        self.make_param('k', 2)
-        self.make_param('width', 50)
-        self.make_param('height', 50)
-        self.make_param('rule', 30, setter=self.setter_rule)
+        self.make_param('N', 50) 
         
-        # I add a parameter here to choose between random initial condition or single seed
-        self.make_param('random', False)
+        self.make_param('T', 200)
+        
+        self.make_param('MaxGenerations', 50)
+        
+        self.make_param('MutationRate', 0.05) 
+        self.make_param('CrossoverRate', 0.8) 
+        self.make_param('ElitismCount', 5)
+        
+        # payoff table for Prisoner's Dilemma
+        self.payoff_table = {(0, 0): 3, (0, 1): 0, (1, 0): 5, (1, 1): 1}
 
-    def setter_rule(self, val):
-        """Setter for the rule parameter, clipping its value between 0 and the
-        maximum possible rule number."""
-        rule_set_size = self.k ** (2 * self.r + 1)
-        max_rule_number = self.k ** rule_set_size
-        return max(0, min(val, max_rule_number - 1))
-
-    def build_rule_set(self):
+    def setup_initial_population(self):
+        """
+        initialize population with predefined strategies and random strategies
         """
         
-        """
+        gene_length = 5 
+        initial_pop = []
         
-        return self.rule_set
-
-    def check_rule(self, inp):
-        """
+        # cite predefined strategies
+        predefined_keys = list(strategies.keys())
         
-        """
-        
-        
-        return self.new_state
-
-    def setup_initial_row(self):
-        """Returns an array of length `width' with the initial state for each of
-        the cells in the first row. Values should be between 0 and k."""
-        
-        if self.random:
-        # Generates a NumPy array of random integers in the range [0, self.k]
-            return np.random.randint(
-                    low=0, 
-                    high=self.k, 
-                    size=self.width,
-                    dtype=int
-            )
-        else:
-            # Initialize an array of zeros
-            row = np.zeros(self.width, dtype=int)
+        for key in predefined_keys:
+            if key != "Random":
+                initial_pop.append(strategies[key])
+                
+        remaining = self.N - len(initial_pop)
+        for _ in range(remaining):
+            random_gene = [random.randint(0, 1) for _ in range(gene_length)]
+            initial_pop.append(random_gene)
             
-            # Set the single non-zero value
-            single_seed_value = 1
-            
-            # Calculate the center index
-            center_index = self.width // 2 
-            
-            # Set the cell in the exact middle of the line to the seed value
-            row[center_index] = single_seed_value
-            
-            return row
+        return initial_pop
 
     def reset(self):
-        """Initializes the configuration of the cells and converts the entered
-        rule number to a rule set."""
+        self.generation = 0
+        self.population = self.setup_initial_population()
+        self.history_scores = []
 
-        self.t = 0
-        self.config = np.zeros([self.height, self.width])
-        self.config[0, :] = self.setup_initial_row()
-        self.build_rule_set()
+    def run_tournament(self):
+        """
+        run a global tournament among all strategies in the population
+        """ 
+        
+        N = self.N
 
-    def draw(self):
-        """Draws the current state of the grid."""
-
-        import matplotlib
-        import matplotlib.pyplot as plt
-
-        plt.cla()
-        if not plt.gca().yaxis_inverted():
-            plt.gca().invert_yaxis()
-        plt.imshow(self.config, interpolation='none', vmin=0, vmax=self.k - 1,
-                cmap=matplotlib.cm.binary)
-        plt.axis('image')
-        plt.title('t = %d' % self.t)
+        strategies_with_fitness = []
+        
+        for i in range(N):
+            strategies_with_fitness.append({'gene': self.population[i], 'fitness': 0})
+            
+        for i in range(N):
+            for j in range(i + 1, N):
+                
+                strategy_i = strategies_with_fitness[i]['gene']
+                strategy_j = strategies_with_fitness[j]['gene']
+                
+                score_i, score_j = RunRepeatedPrisonerDilemma(
+                    strategy_i, 
+                    strategy_j, 
+                    self.T, 
+                    self.payoff_table
+                )
+                
+                strategies_with_fitness[i]['fitness'] += score_i
+                strategies_with_fitness[j]['fitness'] += score_j
+                
+        return strategies_with_fitness
 
     def step(self):
-        """Performs a single step of the simulation by advancing time (and thus
-        row) and applying the rule to determine the state of the cells."""
-        self.t += 1
-        if self.t >= self.height:
+        """
+        perform one generation step
+        """
+        
+        if self.generation >= self.MaxGenerations:
             return True
 
-        for patch in range(self.width):
-            # We want the items r to the left and to the right of this patch,
-            # while wrapping around (e.g. index -1 is the last item on the row).
-            # Since slices do not support this, we create an array with the
-            # indices we want and use that to index our grid.
-            indices = [i % self.width
-                    for i in range(patch - self.r, patch + self.r + 1)]
-            values = self.config[self.t - 1, indices]
-            self.config[self.t, patch] = self.check_rule(values)
-
-
-def genetic_algorithm():
-    '''
-    
-    '''
-    pass
-
-
-
-def run_experiment(width=10, max_steps=100000, repeats=50, random=True):
-    '''
-    
-    '''
-
-
+        # run tournament to get scored population
+        scored_population = self.run_tournament()
         
-    print("Experiment completed.")
-    pass
+        # record average fitness
+        total_fitness = sum(s['fitness'] for s in scored_population)
+        avg_fitness = total_fitness / self.N
+        self.history_scores.append(avg_fitness)
+        
+        # generate new population using genetic algorithm
+        self.population = genetic_algorithm(
+            scored_population,
+            self.N,
+            self.ElitismCount,
+            self.CrossoverRate,
+            self.MutationRate
+        )
+        
+        self.generation += 1
+
+    def draw(self):
+        """
+        draw the evolution of average fitness over generations
+        """
+        plt.cla()
+        
+
+        plt.plot(self.history_scores, label='Average Population Fitness')
+        plt.xlabel('Generation')
+        plt.ylabel('Average Total Score (Fitness)')
+        plt.title('Evolution of Cooperation (Generation %d)' % self.generation)
+        plt.legend()
+        
+def select_parent(scored_population):
+    """
+    based on fitness, select a parent strategy
+    """
+
+    total_fitness = sum(s['fitness'] for s in scored_population)
+    if total_fitness == 0:
+        return random.choice(scored_population)['gene']
+        
+    r = random.uniform(0, total_fitness)
+    current_sum = 0
+    for individual in scored_population:
+        current_sum += individual['fitness']
+        if current_sum > r:
+            return individual['gene']
+            
+    # Fallback to the last one if floating point precision issues occur
+    return scored_population[-1]['gene']
+
+def crossover(parent1_gene, parent2_gene):
+    """
+    single-point crossover between two parent genes
+    """
+    gene_length = len(parent1_gene)
+    point = random.randint(1, gene_length - 1)
+    
+    child1 = parent1_gene[:point] + parent2_gene[point:]
+    child2 = parent2_gene[:point] + parent1_gene[point:]
+    
+    return child1, child2
+
+def mutate(gene, rate):
+    """
+    mutate the gene with given mutation rate
+    """
+    mutated_gene = list(gene) # 复制
+    for i in range(len(mutated_gene)):
+        if random.random() < rate:
+            mutated_gene[i] = 1 - mutated_gene[i] # 0 -> 1, 1 -> 0
+    return mutated_gene
+
+def genetic_algorithm(scored_population, N, elitism_count, crossover_rate, mutation_rate):
+    """
+    based on scored_population (list of dicts with 'gene' and 'fitness'),
+    """
+    
+    # rank individuals by fitness
+    scored_population.sort(key=lambda x: x['fitness'], reverse=True)
+    
+    new_population = []
+    
+    # retain the best individuals
+    for i in range(min(elitism_count, N)):
+        new_population.append(scored_population[i]['gene'])
+        
+    # 3. fill the rest of the population
+    while len(new_population) < N:
+        parent1 = select_parent(scored_population)
+        parent2 = select_parent(scored_population)
+        
+        # crossover
+        if random.random() < crossover_rate and len(new_population) <= N - 2: # 确保至少有空间容纳 2 个子代
+            child1_gene, child2_gene = crossover(parent1, parent2)
+            
+            # mutation
+            new_population.append(mutate(child1_gene, mutation_rate))
+            new_population.append(mutate(child2_gene, mutation_rate))
+        else:
+            # directly mutate parents if no crossover
+            new_population.append(mutate(parent1, mutation_rate))
+            
+    # make sure we only return N individuals
+    return new_population[:N]
 
 
 
 if __name__ == '__main__':
     # Create the simulation model to be run in the GUI
-    sim = CASim()
+    sim = EvolutionSim()
 
     from pyics import GUI
     cx = GUI(sim)
