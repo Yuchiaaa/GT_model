@@ -33,6 +33,7 @@ def payoff_function(config):
     
     """
     pass
+
 class CASim(Model):
     def __init__(self):
         Model.__init__(self)
