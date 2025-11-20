@@ -12,6 +12,7 @@ strategies = {
     "Random": [random.randint(0, 1) for _ in range(5)], 
     "s1": [0, 1, 0, 1, 0], 
     "s2": [1, 0, 1, 0, 1], 
+    # Add more predefined strategies as needed
 }
 
 def get_next_move(strategy_gene, own_history, opp_history):
