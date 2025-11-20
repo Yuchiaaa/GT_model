@@ -217,7 +217,7 @@ def mutate(gene, rate):
     """
     mutate the gene with given mutation rate
     """
-    mutated_gene = list(gene) # 复制
+    mutated_gene = list(gene)
     for i in range(len(mutated_gene)):
         if random.random() < rate:
             mutated_gene[i] = 1 - mutated_gene[i] # 0 -> 1, 1 -> 0
