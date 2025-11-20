@@ -68,12 +68,9 @@ class EvolutionSim(Model):
         self.population = []
         self.history_scores = []
 
-        self.make_param('N', 50) 
-        
-        self.make_param('T', 200)
-        
+        self.make_param('Width', 50) 
+        self.make_param('Repetitions per Match', 200)
         self.make_param('MaxGenerations', 50)
-        
         self.make_param('MutationRate', 0.05) 
         self.make_param('CrossoverRate', 0.8) 
         self.make_param('ElitismCount', 5)
