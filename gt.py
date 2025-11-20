@@ -28,6 +28,11 @@ strategies = {
     
 }
 
+def payoff_function(config):
+    """
+    
+    """
+    pass
 class CASim(Model):
     def __init__(self):
         Model.__init__(self)
@@ -135,6 +140,11 @@ class CASim(Model):
             self.config[self.t, patch] = self.check_rule(values)
 
 
+def genetic_algorithm():
+    '''
+    
+    '''
+    pass
 
 
 
@@ -142,13 +152,11 @@ def run_experiment(width=10, max_steps=100000, repeats=50, random=True):
     '''
     
     '''
-    results = []
-    errors = []
 
 
         
     print("Experiment completed.")
-    return results, errors
+    pass
 
 
 
