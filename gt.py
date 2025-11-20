@@ -70,7 +70,7 @@ class EvolutionSim(Model):
 
         self.make_param('Width', 50) 
         self.make_param('Repetitions per Match', 200)
-        self.make_param('MaxGenerations', 50)
+        self.make_param('MaxGenerations', 100)
         self.make_param('MutationRate', 0.05) 
         self.make_param('CrossoverRate', 0.8) 
         self.make_param('ElitismCount', 5)
