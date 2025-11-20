@@ -23,6 +23,9 @@ def decimal_to_base_k(n, k):
 
 # A dictionary to hold different strategies for the experiments
 strategies = {
+    "s1": ,
+    "s2": ,
+    "s3": ,
     
     
     
