@@ -28,11 +28,19 @@ strategies = {
     
 }
 
-def payoff_function(config):
+def payoff(a_choice, b_choice):
     """
+    0 for C, 1 for D
+    return A's payoff
+    """
+    payoff_table = {
+        (0, 0): 3,
+        (0, 1): 0,
+        (1, 0): 5,
+        (1, 1): 1
+    }
     
-    """
-    pass
+    return payoff_table[(a_choice, b_choice)]
 
 class CASim(Model):
     def __init__(self):
