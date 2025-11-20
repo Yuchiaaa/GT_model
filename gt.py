@@ -68,8 +68,8 @@ class EvolutionSim(Model):
         self.population = []
         self.history_scores = []
 
-        self.make_param('N', 50) 
-        self.make_param('T', 200)
+        self.make_param('N', 50) # population size
+        self.make_param('T', 200) # rounds per tournament
         self.make_param('MaxGenerations', 100)
         self.make_param('MutationRate', 0.05) 
         self.make_param('CrossoverRate', 0.8) 
