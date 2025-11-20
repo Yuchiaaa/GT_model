@@ -230,7 +230,7 @@ def genetic_algorithm(scored_population, N, elitism_count, crossover_rate, mutat
     for i in range(min(elitism_count, N)):
         new_population.append(scored_population[i]['gene'])
         
-    # 3. fill the rest of the population
+    # fill the rest of the population
     while len(new_population) < N:
         parent1 = select_parent(scored_population)
         parent2 = select_parent(scored_population)
