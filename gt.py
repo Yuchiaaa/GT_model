@@ -243,7 +243,7 @@ def genetic_algorithm(scored_population, N, elitism_count, crossover_rate, mutat
         parent2 = select_parent(scored_population)
         
         # crossover
-        if random.random() < crossover_rate and len(new_population) <= N - 2: # 确保至少有空间容纳 2 个子代
+        if random.random() < crossover_rate and len(new_population) <= N - 2:
             child1_gene, child2_gene = crossover(parent1, parent2)
             
             # mutation
