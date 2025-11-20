@@ -68,8 +68,8 @@ class EvolutionSim(Model):
         self.population = []
         self.history_scores = []
 
-        self.make_param('Width', 50) 
-        self.make_param('Repetitions per Match', 200)
+        self.make_param('N', 50) 
+        self.make_param('T', 200)
         self.make_param('MaxGenerations', 100)
         self.make_param('MutationRate', 0.05) 
         self.make_param('CrossoverRate', 0.8) 
@@ -251,13 +251,84 @@ def genetic_algorithm(scored_population, N, elitism_count, crossover_rate, mutat
 
 
 
-if __name__ == '__main__':
-    # Create the simulation model to be run in the GUI
-    sim = EvolutionSim()
+def print_strategy_rules(gene, name="Unknown"):
+    """
+    print the strategy rules based on its gene
+    """
+    rules = [
+        ("Initial Move", "N/A", gene[0]),
+        ("History: C/C", "Own:C, Opp:C", gene[1]),
+        ("History: C/D", "Own:C, Opp:D", gene[2]),
+        ("History: D/C", "Own:D, Opp:C", gene[3]),
+        ("History: D/D", "Own:D, Opp:D", gene[4]),
+    ]
+    
+    print(f"\n--- Strategy Analysis: {name} ---")
+    print(f"Gene Sequence: {gene}")
+    print(f"{'Condition':<15} | {'Description':<15} | {'Action':<10}")
+    print("-" * 45)
+    
+    for condition, desc, action in rules:
+        action_str = "Defect (D)" if action == 1 else "Cooperate (C)"
+        print(f"{condition:<15} | {desc:<15} | {action_str}")
+    print("-" * 45 + "\n")
 
-    from pyics import GUI
-    cx = GUI(sim)
-    cx.start()
+
+if __name__ == '__main__':
+    # initialize simulation
+    sim = EvolutionSim()
+    sim.reset()
+    
+    print(f"Initialization complete. Population size: {sim.N}")
+    print(f"Running Initial Tournament (Generation 0)...")
+
+    
+    # manage initial tournament
+    initial_results = sim.run_tournament() 
+    
+    initial_results.sort(key=lambda x: x['fitness'], reverse=True)
+    
+    print("\n=== Top 5 Strategies in Generation 0 (Initial Viability) ===")
+    print(f"{'Rank':<5} | {'Gene':<20} | {'Score (Fitness)':<15}")
+    for i in range(5):
+        res = initial_results[i]
+        print(f"{i+1:<5} | {str(res['gene']):<20} | {res['fitness']:<15}")
+        
+    # calculate and print average score of the initial population
+    total_init_score = sum(r['fitness'] for r in initial_results)
+    print(f"\nPopulation Average Score (Gen 0): {total_init_score / sim.N:.2f}")
+
+    
+    print("\n=== Starting Genetic Algorithm Evolution ===")
+    generations = 50 
     
     
+    for gen in range(generations):
+        sim.step()
+        
+        # print progress every 10 generations
+        if gen % 10 == 0 or gen == generations - 1:
+            # get current average fitness
+            current_avg = sim.history_scores[-1]
+            print(f"Generation {gen}: Average Fitness = {current_avg:.2f}")
+
+    print("\nEvolution completed.")
+
+
+   
+    # get final results after evolution
+    final_results = sim.run_tournament()
+    
+    # order by fitness
+    final_results.sort(key=lambda x: x['fitness'], reverse=True)
+    
+    # Extract the best individual
+    best_individual = final_results[0]
+    best_gene = best_individual['gene']
+    best_score = best_individual['fitness']
+    
+    print(f"\n=== EVOLUTION RESULT: The Best Strategy ===")
+    print(f"Final Score: {best_score}")
+    
+    print_strategy_rules(best_gene, name="Evolved Champion")
     
