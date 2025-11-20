@@ -28,11 +28,6 @@ def get_next_move(strategy_gene, own_history, opp_history):
     own_prev = own_history[-1]
     opp_prev = opp_history[-1]
 
-    # map history to index
-    # (0, 0) -> 1
-    # (0, 1) -> 2
-    # (1, 0) -> 3
-    # (1, 1) -> 4
     history_index = own_prev * 2 + opp_prev + 1
     
     return strategy_gene[history_index]
