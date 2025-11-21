@@ -279,8 +279,8 @@ if __name__ == '__main__':
     sim = EvolutionSim()
     sim.reset()
     
-    print(f"Initialization complete. Population size: {sim.N}")
-    print(f"Running Initial Tournament (Generation 0)...")
+    print(f"Initialization completed. Population size: {sim.N}")
+    print(f"Running Initial Tournament (t0)")
 
     
     # manage initial tournament
@@ -288,7 +288,7 @@ if __name__ == '__main__':
     
     initial_results.sort(key=lambda x: x['fitness'], reverse=True)
     
-    print("\n=== Top 5 Strategies in Generation 0 (Initial Viability) ===")
+    print("\nTop 5 Strategies in t0 (Initial Viability):")
     print(f"{'Rank':<5} | {'Gene':<20} | {'Score (Fitness)':<15}")
     for i in range(5):
         res = initial_results[i]
@@ -299,7 +299,7 @@ if __name__ == '__main__':
     print(f"\nPopulation Average Score (Gen 0): {total_init_score / sim.N:.2f}")
 
     
-    print("\n=== Starting Genetic Algorithm Evolution ===")
+    print("\nStarting Genetic Algorithm Evolution:")
     generations = 50 
     
     
@@ -327,7 +327,7 @@ if __name__ == '__main__':
     best_gene = best_individual['gene']
     best_score = best_individual['fitness']
     
-    print(f"\n=== EVOLUTION RESULT: The Best Strategy ===")
+    print(f"\nEVOLUTION RESULT: The Best Strategy:")
     print(f"Final Score: {best_score}")
     
     print_strategy_rules(best_gene, name="Evolved Champion")
