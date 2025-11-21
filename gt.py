@@ -13,6 +13,22 @@ strategies = {
     "s1": [0, 1, 0, 1, 0], 
     "s2": [1, 0, 1, 0, 1], 
     # Add more original strategies
+    """
+    I thought, maybe something like this:
+    0 - "TitForTat": [0, 0, 1, 0, 1],
+    1 - "AllC": [0, 0, 0, 0, 0],
+    2 - "AllD": [1, 1, 1, 1, 1],
+    3 - "Random": [random.randint(0, 1) for _ in range(5)],
+    4 - "OpposeTFT": [0, 1, 0, 1, 0],
+    5 - “NegativeTFT": [1, 0, 1, 0, 1],
+    6 - “Alternating”: [0/1, 1, 1, 0, 0]
+    7 - “Vengeful”: [0, 0, 1, 1, 1]
+    8 - “Mean”: [0/1, 1, 0, 0, 0]
+    9 - “Forgiving”: [0, 0, 1, 0, 0]
+    10 - “Cooperative” [0, 0, 1, 1, 0]
+        * When I wrote 0/1 as the first, it can either be random or we can choose 
+        one of the two, I don’t think it really matters for the rule.
+    """
 }
 
 def get_next_move(strategy_gene, own_history, opp_history):
