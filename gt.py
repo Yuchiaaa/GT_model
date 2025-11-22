@@ -8,8 +8,6 @@
 # and a cellular automaton model to visualize the spatial evolution of strategies.
 
 
-
-
 import numpy as np
 import random
 import matplotlib.pyplot as plt
