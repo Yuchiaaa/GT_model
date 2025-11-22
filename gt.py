@@ -29,17 +29,17 @@ PAYOFF_TABLE = {
 # Dictionary containing TitForTat and 10 original strategies
 # Gene encoding: [Initial, CC, CD, DC, DD]
 FIXED_ENV_STRATEGIES = {
-    "TitForTat":    [0, 0, 1, 0, 1],
-    "AllC":         [0, 0, 0, 0, 0],
-    "AllD":         [1, 1, 1, 1, 1],
-    "Grim":         [0, 0, 1, 1, 1],
-    "Pavlov":       [0, 0, 1, 1, 0],
-    "SusTfT":       [1, 0, 1, 0, 1],
-    "Bully":        [1, 1, 0, 1, 0],
-    "Prober":       [0, 1, 1, 0, 0],
-    "ForgiveTfT":   [0, 0, 1, 0, 0],
-    "Cyclic":       [0, 1, 1, 0, 0],
-    "InvPavlov":    [0, 1, 0, 0, 1]
+    "TitForTat":    [0, 0, 1, 0, 1],  # Starts with Cooperation. Then replicates opponent's previous move.
+    "AllC":         [0, 0, 0, 0, 0],  # Always Cooperates.
+    "AllD":         [1, 1, 1, 1, 1],  # Always Defects. 
+    "s4":         [0, 0, 1, 1, 1],  # Cooperates until opponent defects once, then never forgives (always defects).
+    "s5":       [0, 0, 1, 1, 0],  # Win-Stay, Lose-Shift. Repeats move if payoff was high, switches if payoff was low.
+    "s6":       [1, 0, 1, 0, 1],  # Suspicious Tit-For-Tat. Same behavior as TfT but starts by Defecting.
+    "s7":        [1, 1, 0, 1, 0],  # Defects against cooperators, but cooperates if punished by defection.
+    "s8":       [0, 1, 1, 0, 0],  # Starts nice, but occasionally defects to test for exploitability.
+    "s9":   [0, 0, 1, 0, 0],  # Retaliates against Defection but attempts to restore cooperation after mutual defection.
+    "s10":       [0, 1, 1, 0, 0],  # Follows a fixed cycle regardless of the opponent's actions.
+    "s11":    [0, 1, 0, 0, 1]   # Win-shift, lose-stay. Switches action when winning, keeps action when losing.
 }
 
 
