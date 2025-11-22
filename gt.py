@@ -5,7 +5,9 @@
 # This program is used for the course 'Introduction to Computational Science' in the Computational Science minor.
 # It includes a tournament among fixed strategies in the Iterated Prisoner's Dilemma, 
 # a genetic algorithm to evolve an optimal strategy, 
-# and a cellular automaton model to visualize the spatial evolution of strategies.
+# and a cellular automaton model to visualize the spatial evolution of strategies. 
+# Reference:
+# spatial evolution of strategies: Nowak, M. A., & May, R. M. (1992). Evolutionary games and spatial chaos. nature, 359(6398), 826-829.
 
 
 import numpy as np
