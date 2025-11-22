@@ -271,61 +271,23 @@ class CASim(Model):
         plt.title(f'Generation: {self.t}')
 
 if __name__ == '__main__':
-    # initialize simulation
-    sim = EvolutionSim()
-    sim.reset()
-    
-    print(f"Initialization completed. Population size: {sim.N}")
-    print(f"Running Initial Tournament (t0)")
-
-    
-    # manage initial tournament
-    initial_results = sim.run_tournament() 
-    
-    initial_results.sort(key=lambda x: x['fitness'], reverse=True)
-    
-    print("\nTop 5 Strategies in t0 (Initial Viability):")
-    print(f"{'Rank':<5} | {'Gene':<20} | {'Score (Fitness)':<15}")
-    for i in range(5):
-        res = initial_results[i]
-        print(f"{i+1:<5} | {str(res['gene']):<20} | {res['fitness']:<15}")
-        
-    # calculate and print average score of the initial population
-    total_init_score = sum(r['fitness'] for r in initial_results)
-    print(f"\nPopulation Average Score (Gen 0): {total_init_score / sim.N:.2f}")
-
-    
-    print("\nStarting Genetic Algorithm Evolution:")
-    generations = 50 
+    # sim = CASim()
+    # cx = GUI(sim)
+    # cx.start()
     
     
-    for gen in range(generations):
-        sim.step()
-        
-        # print progress every 10 generations
-        if gen % 10 == 0 or gen == generations - 1:
-            # get current average fitness
-            current_avg = sim.history_scores[-1]
-            print(f"Generation {gen}: Average Fitness = {current_avg:.2f}")
-
-    print("\nEvolution completed.")
-
-
-   
-    # get final results after evolution
-    final_results = sim.run_tournament()
+    # Run tournament visualization
+    run_and_visualize_tournament(FIXED_ENV_STRATEGIES, rounds=200)
     
-    # order by fitness
-    final_results.sort(key=lambda x: x['fitness'], reverse=True)
-    
-    # Extract the best individual
-    best_individual = final_results[0]
-    best_gene = best_individual['gene']
-    best_score = best_individual['fitness']
-    
-    print(f"\nEVOLUTION RESULT: The Best Strategy:")
-    print(f"Final Score: {best_score}")
-    
-    print_strategy_rules(best_gene, name="Evolved Champion")
+    # Run GA
+    print("Running Genetic Algorithm")
+    best_strategy = evolve_best_strategy(
+        pop_size=30,
+        generations=50,
+        rounds=200,
+        mutation_rate=0.05,
+        elite_count=5
+    )
+    print(f"GA Best Strategy Found: {best_strategy}")
     
     
