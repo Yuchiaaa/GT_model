@@ -1,3 +1,15 @@
+# Name:         Yujia Liu
+# Studentnr.:   14806762
+# Study:        BSc Computational Social Science
+
+# This program is used for the course 'Introduction to Computational Science' in the Computational Science minor.
+# It includes a tournament among fixed strategies in the Iterated Prisoner's Dilemma, 
+# a genetic algorithm to evolve an optimal strategy, 
+# and a cellular automaton model to visualize the spatial evolution of strategies.
+
+
+
+
 import numpy as np
 import random
 import matplotlib.pyplot as plt
