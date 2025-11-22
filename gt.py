@@ -145,7 +145,7 @@ def evolve_best_strategy(pop_size=20, generations=50, rounds=200,
         population.append({"gene": gene, "fitness": 0})
         
     history_avg = []
-    history_best = [] # Best Fitness is the score of the highest-scoring individual out of 30 individuals (pop_size=30) in this generation.
+    history_best = [] # Best Fitness is the score of the highest-scoring one out of all the players in this generation.
 
     for gen in range(generations):
         # Evaluation
