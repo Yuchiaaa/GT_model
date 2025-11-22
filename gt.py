@@ -271,6 +271,7 @@ class CASim(Model):
         plt.title(f'Generation: {self.t}')
 
 if __name__ == '__main__':
+    # Uncomment to run CA GUI
     # sim = CASim()
     # cx = GUI(sim)
     # cx.start()
