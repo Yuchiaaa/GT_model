@@ -1,334 +1,293 @@
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+import copy
+from pyics import Model, GUI
 
-from pyics import Model
 
-
-strategies = {
-    "TitForTat": [0, 0, 1, 0, 1],
-    "AllC": [0, 0, 0, 0, 0],    
-    "AllD": [1, 1, 1, 1, 1],     
-    "Random": [random.randint(0, 1) for _ in range(5)], 
-    "s1": [0, 1, 0, 1, 0], 
-    "s2": [1, 0, 1, 0, 1], 
-    # Add more original strategies
+# (A_action, B_action): A_payoff
+# 0 = Cooperate, 1 = Defect
+PAYOFF_TABLE = {
+    (0, 0): 3, 
+    (0, 1): 0,  
+    (1, 0): 5, 
+    (1, 1): 1 
 }
 
-def get_next_move(strategy_gene, own_history, opp_history):
+# Dictionary containing TitForTat and 10 original strategies
+# Gene encoding: [Initial, CC, CD, DC, DD]
+FIXED_ENV_STRATEGIES = {
+    "TitForTat":    [0, 0, 1, 0, 1],
+    "AllC":         [0, 0, 0, 0, 0],
+    "AllD":         [1, 1, 1, 1, 1],
+    "Grim":         [0, 0, 1, 1, 1],
+    "Pavlov":       [0, 0, 1, 1, 0],
+    "SusTfT":       [1, 0, 1, 0, 1],
+    "Bully":        [1, 1, 0, 1, 0],
+    "Prober":       [0, 1, 1, 0, 0],
+    "ForgiveTfT":   [0, 0, 1, 0, 0],
+    "Cyclic":       [0, 1, 1, 0, 0],
+    "InvPavlov":    [0, 1, 0, 0, 1]
+}
+
+
+def get_move(gene, history_own, history_opp):
     """
-    based on strategy_gene and history, return next move (0=C, 1=D)
+    Decides the next move based on the gene and history.
+    Gene indices: 0=Init, 1=(C,C), 2=(C,D), 3=(D,C), 4=(D,D).
     """
+    if not history_own:
+        return gene[0]
     
-    # initial move
-    if not own_history:
-        return strategy_gene[0]
+    prev_own = history_own[-1]
+    prev_opp = history_opp[-1]
     
-    # get last moves
-    own_prev = own_history[-1]
-    opp_prev = opp_history[-1]
+    # Map history (prev_own, prev_opp) to gene index 1-4
+    idx = 1 + (prev_own * 2 + prev_opp)
+    return gene[idx]
 
-    history_index = own_prev * 2 + opp_prev + 1
+def play_game(gene_a, gene_b, rounds):
+    """
+    Simulates a repeated Prisoner's Dilemma game.
+    Returns the cumulative scores for player A.
+    """
+    hist_a, hist_b = [], []
+    score_a = 0
     
-    return strategy_gene[history_index]
+    for _ in range(rounds):
+        move_a = get_move(gene_a, hist_a, hist_b)
+        move_b = get_move(gene_b, hist_b, hist_a)
+        
+        score_a += PAYOFF_TABLE[(move_a, move_b)]
+        
+        hist_a.append(move_a)
+        hist_b.append(move_b)
+        
+    return score_a
 
-def RunRepeatedPrisonerDilemma(strategy_a, strategy_b, repetitions, payoff_table):
-    """
-    run repeated prisoner's dilemma between two strategies
-    """
-    
-    a_history = []
-    b_history = []
-    a_score = 0
-    b_score = 0
-    
-    for _ in range(repetitions):
-        # make choices
-        a_choice = get_next_move(strategy_a, a_history, b_history)
-        b_choice = get_next_move(strategy_b, b_history, a_history)
-        
-        # get payoffs
-        score_a = payoff_table[(a_choice, b_choice)]
-        score_b = payoff_table[(b_choice, a_choice)]
-        
-        a_score += score_a
-        b_score += score_b
-        
-        # update history
-        a_history.append(a_choice)
-        b_history.append(b_choice)
-        
-    return a_score, b_score
 
-class EvolutionSim(Model):
-    def __init__(self):
-        Model.__init__(self)
+# Genetic Algorithm
 
-        self.generation = 0
-        self.population = []
-        self.history_scores = []
-
-        self.make_param('N', 50) # population size
-        self.make_param('T', 200) # rounds per tournament
-        self.make_param('MaxGenerations', 100)
-        self.make_param('MutationRate', 0.05) 
-        self.make_param('CrossoverRate', 0.8) 
-        self.make_param('ElitismCount', 5)
-        
-        # payoff table for Prisoner's Dilemma
-        self.payoff_table = {(0, 0): 3, (0, 1): 0, (1, 0): 5, (1, 1): 1}
-
-    def setup_initial_population(self):
-        """
-        initialize population with predefined strategies and random strategies
-        """
-        
-        gene_length = 5 
-        initial_pop = []
-        
-        # cite predefined strategies
-        predefined_keys = list(strategies.keys())
-        
-        for key in predefined_keys:
-            if key != "Random":
-                initial_pop.append(strategies[key])
-                
-        remaining = self.N - len(initial_pop)
-        for _ in range(remaining):
-            random_gene = [random.randint(0, 1) for _ in range(gene_length)]
-            initial_pop.append(random_gene)
-            
-        return initial_pop
-
-    def reset(self):
-        self.generation = 0
-        self.population = self.setup_initial_population()
-        self.history_scores = []
-
-    def run_tournament(self):
-        """
-        run a global tournament among all strategies in the population
-        """ 
-        
-        N = self.N
-
-        strategies_with_fitness = []
-        
-        for i in range(N):
-            strategies_with_fitness.append({'gene': self.population[i], 'fitness': 0})
-            
-        for i in range(N):
-            for j in range(i + 1, N):
-                
-                strategy_i = strategies_with_fitness[i]['gene']
-                strategy_j = strategies_with_fitness[j]['gene']
-                
-                score_i, score_j = RunRepeatedPrisonerDilemma(
-                    strategy_i, 
-                    strategy_j, 
-                    self.T, 
-                    self.payoff_table
-                )
-                
-                strategies_with_fitness[i]['fitness'] += score_i
-                strategies_with_fitness[j]['fitness'] += score_j
-                
-        return strategies_with_fitness
-
-    def step(self):
-        """
-        perform one generation step
-        """
-        
-        if self.generation >= self.MaxGenerations:
-            return True
-
-        # run tournament to get scored population
-        scored_population = self.run_tournament()
-        
-        # record average fitness
-        total_fitness = sum(s['fitness'] for s in scored_population)
-        avg_fitness = total_fitness / self.N
-        self.history_scores.append(avg_fitness)
-        
-        # generate new population using genetic algorithm
-        self.population = genetic_algorithm(
-            scored_population,
-            self.N,
-            self.ElitismCount,
-            self.CrossoverRate,
-            self.MutationRate
-        )
-        
-        self.generation += 1
-
-    def draw(self):
-        """
-        draw the evolution of average fitness over generations
-        """
-        plt.cla()
-        
-
-        plt.plot(self.history_scores, label='Average Population Fitness')
-        plt.xlabel('Generation')
-        plt.ylabel('Average Total Score (Fitness)')
-        plt.title('Evolution of Cooperation (Generation %d)' % self.generation)
-        plt.legend()
-        
-def select_parent(scored_population):
-    """
-    based on fitness, select a parent strategy
-    """
-
-    total_fitness = sum(s['fitness'] for s in scored_population)
-    if total_fitness == 0:
-        return random.choice(scored_population)['gene']
-        
-    r = random.uniform(0, total_fitness)
-    current_sum = 0
-    for individual in scored_population:
-        current_sum += individual['fitness']
-        if current_sum > r:
-            return individual['gene']
-            
-    # Fallback to the last one if floating point precision issues occur
-    return scored_population[-1]['gene']
-
-def crossover(parent1_gene, parent2_gene):
-    """
-    single-point crossover between two parent genes
-    """
-    gene_length = len(parent1_gene)
-    point = random.randint(1, gene_length - 1)
-    
-    child1 = parent1_gene[:point] + parent2_gene[point:]
-    child2 = parent2_gene[:point] + parent1_gene[point:]
-    
-    return child1, child2
+def crossover(p1, p2):
+    """Performs single-point crossover."""
+    point = random.randint(1, 4)
+    c1 = p1[:point] + p2[point:]
+    c2 = p2[:point] + p1[point:]
+    return c1, c2
 
 def mutate(gene, rate):
-    """
-    mutate the gene with given mutation rate
-    """
-    mutated_gene = list(gene)
-    for i in range(len(mutated_gene)):
+    """Performs bit-flip mutation."""
+    new_gene = copy.deepcopy(gene)
+    for i in range(5):
         if random.random() < rate:
-            mutated_gene[i] = 1 - mutated_gene[i] # 0 -> 1, 1 -> 0
-    return mutated_gene
+            new_gene[i] = 1 - new_gene[i]
+    return new_gene
 
-def genetic_algorithm(scored_population, N, elitism_count, crossover_rate, mutation_rate):
+# Function for tournament and visualization
+def run_and_visualize_tournament(strategies, rounds=200):
     """
-    based on scored_population (list of dicts with 'gene' and 'fitness'),
+    Runs a tournament and plots the results.
     """
+    scores = {name: 0 for name in strategies}
+    names = list(strategies.keys())
+    n = len(names)
     
-    # rank individuals by fitness
-    scored_population.sort(key=lambda x: x['fitness'], reverse=True)
-    
-    new_population = []
-    
-    # retain the best individuals
-    for i in range(min(elitism_count, N)):
-        new_population.append(scored_population[i]['gene'])
-        
-    # fill the rest of the population
-    while len(new_population) < N:
-        parent1 = select_parent(scored_population)
-        parent2 = select_parent(scored_population)
-        
-        # crossover
-        if random.random() < crossover_rate and len(new_population) <= N - 2:
-            child1_gene, child2_gene = crossover(parent1, parent2)
+    for i in range(n):
+        for j in range(i, n):
+            name_a = names[i]
+            name_b = names[j]
+            s_a = play_game(strategies[name_a], strategies[name_b], rounds)
+            s_b = play_game(strategies[name_b], strategies[name_a], rounds)
+            scores[name_a] += s_a
+            scores[name_b] += s_b
             
-            # mutation
-            new_population.append(mutate(child1_gene, mutation_rate))
-            new_population.append(mutate(child2_gene, mutation_rate))
+    sorted_scores = sorted(scores.items(), key=lambda item: item[1], reverse=True)
+    sorted_names = [item[0] for item in sorted_scores]
+    sorted_values = [item[1] for item in sorted_scores]
+    
+    plt.figure(figsize=(10, 6))
+    colors = ['#FF5733' if i < 3 else '#33A1FF' for i in range(len(sorted_names))]
+    bars = plt.bar(sorted_names, sorted_values, color=colors)
+    plt.xlabel('Strategy')
+    plt.ylabel('Total Score')
+    plt.title(f'Tournament Results (t={rounds})')
+    plt.xticks(rotation=45, ha='right')
+    
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, yval, int(yval), va='bottom', ha='center', fontsize=8)
+    
+    plt.tight_layout()
+    plt.show()
+    return scores
+
+def evolve_best_strategy(pop_size=20, generations=50, rounds=200, 
+                         mutation_rate=0.05, elite_count=5):
+    """
+    Runs the genetic algorithm to evolve an optimal strategy against the fixed environment.
+    Returns the best gene found.
+    """
+    population = []
+    for i in range(pop_size):
+        gene = [random.randint(0, 1) for _ in range(5)]
+        population.append({"gene": gene, "fitness": 0})
+        
+    history_avg = []
+    history_best = []
+
+    for gen in range(generations):
+        # Evaluation
+        for individual in population:
+            current_score = 0
+            for fixed_name, fixed_gene in FIXED_ENV_STRATEGIES.items():
+                s_ind = play_game(individual['gene'], fixed_gene, rounds)
+                current_score += s_ind
+            individual['fitness'] = current_score
+
+        fits = [ind['fitness'] for ind in population]
+        history_avg.append(sum(fits) / pop_size)
+        history_best.append(max(fits))
+        
+        # Selection
+        population.sort(key=lambda x: x['fitness'], reverse=True)
+        elites = population[:elite_count]
+        
+        # Next Gen
+        next_gen = []
+        next_gen.extend(copy.deepcopy(elites))
+        while len(next_gen) < pop_size:
+            p1 = random.choice(elites)
+            p2 = random.choice(elites)
+            c1, c2 = crossover(p1['gene'], p2['gene'])
+            next_gen.append({"gene": mutate(c1, mutation_rate), "fitness": 0})
+            if len(next_gen) < pop_size:
+                next_gen.append({"gene": mutate(c2, mutation_rate), "fitness": 0})
+        population = next_gen
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(history_avg, label='Average Fitness', color='blue')
+    plt.plot(history_best, label='Best Fitness', color='green', linestyle='--')
+    plt.title('Genetic Algorithm Evolution Process')
+    plt.xlabel('Generation')
+    plt.ylabel('Fitness')
+    plt.legend()
+    plt.show()
+    
+    population.sort(key=lambda x: x['fitness'], reverse=True)
+    return population[0]['gene']
+
+
+# CA Model for GUI
+
+class CASim(Model):
+    def __init__(self):
+        Model.__init__(self)
+        
+        self.t = 0
+        self.config = None
+        self.current_genes = [] 
+
+        # Parameters compatible with pyics
+        self.make_param('width', 50)
+        self.make_param('height', 100)
+        self.make_param('T', 50)
+        self.make_param('mutation_rate', 0.01)
+        self.make_param('random_init', True)
+
+    def reset(self):
+        """Initialize the grid and strategies."""
+        self.t = 0
+        self.config = np.zeros([self.height, self.width], dtype=int)
+        self.current_genes = []
+
+        # Initialize row 0
+        if self.random_init:
+            for _ in range(self.width):
+                self.current_genes.append([random.randint(0, 1) for _ in range(5)])
         else:
-            # directly mutate parents if no crossover
-            new_population.append(mutate(parent1, mutation_rate))
+            # Fixed pattern: All-D with TfT in middle
+            for _ in range(self.width):
+                self.current_genes.append([1, 1, 1, 1, 1]) 
+            mid = self.width // 2
+            self.current_genes[mid] = [0, 0, 1, 0, 1]
+
+        # Visualization update
+        for x in range(self.width):
+            self.config[0, x] = int("".join(map(str, self.current_genes[x])), 2)
+
+    def step(self):
+        """Perform one generation of spatial evolution."""
+        self.t += 1
+        if self.t >= self.height:
+            return True
+
+        width = self.width
+        scores = [0] * width
+        
+        # Interaction (Play against neighbors)
+        for x in range(width):
+            left_idx = (x - 1) % width
+            right_idx = (x + 1) % width
             
-    # make sure we only return N individuals
-    return new_population[:N]
+            me = self.current_genes[x]
+            left = self.current_genes[left_idx]
+            right = self.current_genes[right_idx]
+            
+            # Score is sum of games against left and right neighbors
+            score = play_game(me, left, self.T) + play_game(me, right, self.T)
+            scores[x] = score
 
+        # Selection (Copy Best Neighbor's Behavior)
+        next_genes = []
+        for x in range(width):
+            left_idx = (x - 1) % width
+            right_idx = (x + 1) % width
+            
+            # Compare self, left, and right
+            candidates_idx = [left_idx, x, right_idx]
+            best_idx = max(candidates_idx, key=lambda i: scores[i])
+            
+            winning_gene = copy.deepcopy(self.current_genes[best_idx])
+            
+            # Mutation
+            final_gene = mutate(winning_gene, self.mutation_rate)
+            next_genes.append(final_gene)
 
+        self.current_genes = next_genes
+        
+        # Update visualization
+        for x in range(width):
+            self.config[self.t, x] = int("".join(map(str, self.current_genes[x])), 2)
 
-def print_strategy_rules(gene, name="Unknown"):
-    """
-    print the strategy rules based on its gene
-    """
-    rules = [
-        ("Initial Move", "N/A", gene[0]),
-        ("History: C/C", "Own:C, Opp:C", gene[1]),
-        ("History: C/D", "Own:C, Opp:D", gene[2]),
-        ("History: D/C", "Own:D, Opp:C", gene[3]),
-        ("History: D/D", "Own:D, Opp:D", gene[4]),
-    ]
-    
-    print(f"\n--- Strategy Analysis: {name} ---")
-    print(f"Gene Sequence: {gene}")
-    print(f"{'Condition':<15} | {'Description':<15} | {'Action':<10}")
-    print("-" * 45)
-    
-    for condition, desc, action in rules:
-        action_str = "Defect (D)" if action == 1 else "Cooperate (C)"
-        print(f"{condition:<15} | {desc:<15} | {action_str}")
-    print("-" * 45 + "\n")
-
+    def draw(self):
+        """Draws the CA grid."""
+        plt.cla()
+        if not plt.gca().yaxis_inverted():
+            plt.gca().invert_yaxis()
+        # Use nipy_spectral to distinguish the 32 possible strategies
+        plt.imshow(self.config, interpolation='none', vmin=0, vmax=31,
+                cmap='nipy_spectral', aspect='auto')
+        plt.axis('image')
+        plt.title(f'Generation: {self.t}')
 
 if __name__ == '__main__':
-    # initialize simulation
-    sim = EvolutionSim()
-    sim.reset()
-    
-    print(f"Initialization completed. Population size: {sim.N}")
-    print(f"Running Initial Tournament (t0)")
-
-    
-    # manage initial tournament
-    initial_results = sim.run_tournament() 
-    
-    initial_results.sort(key=lambda x: x['fitness'], reverse=True)
-    
-    print("\nTop 5 Strategies in t0 (Initial Viability):")
-    print(f"{'Rank':<5} | {'Gene':<20} | {'Score (Fitness)':<15}")
-    for i in range(5):
-        res = initial_results[i]
-        print(f"{i+1:<5} | {str(res['gene']):<20} | {res['fitness']:<15}")
-        
-    # calculate and print average score of the initial population
-    total_init_score = sum(r['fitness'] for r in initial_results)
-    print(f"\nPopulation Average Score (Gen 0): {total_init_score / sim.N:.2f}")
-
-    
-    print("\nStarting Genetic Algorithm Evolution:")
-    generations = 50 
+    # sim = CASim()
+    # cx = GUI(sim)
+    # cx.start()
     
     
-    for gen in range(generations):
-        sim.step()
-        
-        # print progress every 10 generations
-        if gen % 10 == 0 or gen == generations - 1:
-            # get current average fitness
-            current_avg = sim.history_scores[-1]
-            print(f"Generation {gen}: Average Fitness = {current_avg:.2f}")
-
-    print("\nEvolution completed.")
-
-
-   
-    # get final results after evolution
-    final_results = sim.run_tournament()
+    # Run tournament visualization
+    run_and_visualize_tournament(FIXED_ENV_STRATEGIES, rounds=200)
     
-    # order by fitness
-    final_results.sort(key=lambda x: x['fitness'], reverse=True)
+    # Run GA
+    print("Running Genetic Algorithm")
+    best_strategy = evolve_best_strategy(
+        pop_size=30,
+        generations=50,
+        rounds=200,
+        mutation_rate=0.05,
+        elite_count=5
+    )
+    print(f"GA Best Strategy Found: {best_strategy}")
     
-    # Extract the best individual
-    best_individual = final_results[0]
-    best_gene = best_individual['gene']
-    best_score = best_individual['fitness']
-    
-    print(f"\nEVOLUTION RESULT: The Best Strategy:")
-    print(f"Final Score: {best_score}")
-    
-    print_strategy_rules(best_gene, name="Evolved Champion")
     
