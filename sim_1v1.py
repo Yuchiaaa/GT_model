@@ -145,7 +145,6 @@ class CASim(Model):
             print(len(other_moves))
             if len(other_moves) > 0:
                 avg = sum(other_moves) / len(other_moves)
-                print(avg)
                 if avg > 0.5:
                     return 1
             return 0
