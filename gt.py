@@ -93,7 +93,7 @@ def mutate(gene, rate):
     return new_gene
 
 # Function for tournament and visualization
-def run_and_visualize_tournament(strategies, rounds=200):
+def run_and_visualize_tournament(strategies, rounds=300, payoff_table=PAYOFF_TABLE):
     """
     Runs a tournament and plots the results.
     """
@@ -105,8 +105,8 @@ def run_and_visualize_tournament(strategies, rounds=200):
         for j in range(i, n):
             name_a = names[i]
             name_b = names[j]
-            s_a = play_game(strategies[name_a], strategies[name_b], rounds)
-            s_b = play_game(strategies[name_b], strategies[name_a], rounds)
+            s_a = play_game(strategies[name_a], strategies[name_b], rounds, payoff_table)
+            s_b = play_game(strategies[name_b], strategies[name_a], rounds, payoff_table)
             scores[name_a] += s_a
             scores[name_b] += s_b
             
