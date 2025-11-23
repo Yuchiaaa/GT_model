@@ -139,7 +139,7 @@ def evolve_best_strategy(pop_size=30, generations=50, rounds=200,
     Returns the best gene found.
     """
     population = []
-    for i in range(pop_size): # randomly generate 20 different strategies
+    for i in range(pop_size): # randomly generate 30 different strategies
         gene = [random.randint(0, 1) for _ in range(5)]
         population.append({"gene": gene, "fitness": 0})
         
