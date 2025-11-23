@@ -1,8 +1,12 @@
-# Name:         Wendy van Wooning
-# Studentnr.:   12493104
+# Name:         Wendy van Wooning, Yujia Liu
+# Studentnr.:   12493104, 14806762
 # Study:        BSc Informatica
 #
-# This program is used for
+# This program is used for simulating games of the 'Prisoner's Dilemma'. It
+# simulates a game between two 'players', each of which is represented by a
+# strategy, a number between 0 and 11 which decides which moves each player
+# in each rounds. The number of rounds can also be specified, and at the end
+# of the simulated game, the program will print out each player's score.
 
 import numpy as np
 
@@ -95,6 +99,9 @@ class CASim(Model):
 
 
     def play_strategy(self, player, opponent, strat):
+        """ This function decides the next move to play for a player, based on
+        that player's strategy, represented by a 0 (for cooperation) or a 1 
+        (for defecting) which this function returns."""
         # Set up: Get the previous round, and the list of all the player's and
         # the opponents played moves
         prev_round = [self.config[self.t - 1, 0], self.config[self.t - 1, 1]]
@@ -185,6 +192,8 @@ class CASim(Model):
 
 
     def calculate_score(self):
+        """ This calculates the score for each player per round, and makes sure the
+        total score is kept as well, printing the total at the end of the game. """
         # Player 1 cooperated
         if self.config[self.t, 0] == 0:
             # Both cooperate
