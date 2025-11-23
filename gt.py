@@ -34,14 +34,14 @@ FIXED_ENV_STRATEGIES = {
     "AllD":         [1, 1, 1, 1, 1],  # Always Defects. 
     "Vengeful":         [0, 0, 1, 1, 1],  # Cooperates until opponent defects once, then never forgives (always defects).
     "Ambitious":       [0, 0, 1, 1, 0],  # Win-Stay, Lose-Shift. Repeats move if payoff was high, switches if payoff was low.
-    "DefectingTFT(/NegativeTFT)":       [1, 0, 1, 0, 1],  # Suspicious Tit-For-Tat. Same behavior as TfT but starts by Defecting.
+    "NegativeTFT":       [1, 0, 1, 0, 1],  # Suspicious Tit-For-Tat. Same behavior as TfT but starts by Defecting.
     "Opposing":        [1, 1, 0, 1, 0],  # Defects against cooperators, but cooperates if punished by defection.
     
     # s8 is the same as s10, the alternating strategy. I would propose, for example, a 'mean one': [0(/1), 1, 0, 0, 0]
     "Mean One":       [0, 1, 1, 0, 0],  # Starts nice, but occasionally defects to test for exploitability.
     "Forgiving":   [0, 0, 1, 0, 0],  # Retaliates against Defection but attempts to restore cooperation after mutual defection.
     "Alternating":       [0, 1, 1, 0, 0],  # Follows a fixed cycle regardless of the opponent's actions.
-    "Uncooperative(/or Diversifying)":    [0, 1, 0, 0, 1]   # Win-shift, lose-stay. Switches action when winning, keeps action when losing.
+    "Diversifying":    [0, 1, 0, 0, 1]   # Win-shift, lose-stay. Switches action when winning, keeps action when losing.
 }
 
 
