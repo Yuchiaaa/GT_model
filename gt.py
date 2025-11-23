@@ -57,7 +57,7 @@ def get_move(gene, history_own, history_opp):
     idx = 1 + (prev_own * 2 + prev_opp)
     return gene[idx]
 
-def play_game(gene_a, gene_b, rounds):
+def play_game(gene_a, gene_b, rounds, payoff_table=PAYOFF_TABLE):
     """
     Simulates a repeated Prisoner's Dilemma game.
     Returns the cumulative scores for player A.
@@ -133,12 +133,12 @@ def run_and_visualize_tournament(strategies, rounds=200):
     return scores
 
 def evolve_best_strategy(pop_size=20, generations=50, rounds=200, 
-                         mutation_rate=0.05, elite_count=5):
+                         mutation_rate=0.05, elite_count=5, payoff_table=PAYOFF_TABLE):
     """
     Runs the genetic algorithm to evolve an optimal strategy against the fixed environment.
     Returns the best gene found.
     """
-    population = []
+    population = [] 
     for i in range(pop_size): # randomly generate different strategies to play with the fixed ones
         gene = [random.randint(0, 1) for _ in range(5)]
         population.append({"gene": gene, "fitness": 0})
@@ -151,7 +151,7 @@ def evolve_best_strategy(pop_size=20, generations=50, rounds=200,
         for individual in population:
             current_score = 0
             for fixed_name, fixed_gene in FIXED_ENV_STRATEGIES.items(): # play against all fixed strategies
-                s_ind = play_game(individual['gene'], fixed_gene, rounds)
+                s_ind = play_game(individual['gene'], fixed_gene, rounds, payoff_table)
                 current_score += s_ind
             individual['fitness'] = current_score
 
