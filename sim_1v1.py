@@ -1,5 +1,5 @@
-# Name:         Wendy van Wooning, Yujia Liu
-# Studentnr.:   12493104, 14806762
+# Name:         Wendy van Wooning
+# Studentnr.:   12493104
 # Study:        BSc Informatica
 #
 # This program is used for simulating games of the 'Prisoner's Dilemma'. It
