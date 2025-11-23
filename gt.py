@@ -132,14 +132,14 @@ def run_and_visualize_tournament(strategies, rounds=200):
     plt.show()
     return scores
 
-def evolve_best_strategy(pop_size=30, generations=50, rounds=200, 
+def evolve_best_strategy(pop_size=20, generations=50, rounds=200, 
                          mutation_rate=0.05, elite_count=5):
     """
     Runs the genetic algorithm to evolve an optimal strategy against the fixed environment.
     Returns the best gene found.
     """
     population = []
-    for i in range(pop_size): # randomly generate 30 different strategies
+    for i in range(pop_size): # randomly generate different strategies to play with the fixed ones
         gene = [random.randint(0, 1) for _ in range(5)]
         population.append({"gene": gene, "fitness": 0})
         
