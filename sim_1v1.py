@@ -217,7 +217,7 @@ class CASim(Model):
 
         if self.t == self.rounds - 1:
             print(f'Score player 1: {self.score_1}')
-            print(f'Score player 1: {self.score_2}\n')
+            print(f'Score player 2: {self.score_2}\n')
 
 
 if __name__ == '__main__':
