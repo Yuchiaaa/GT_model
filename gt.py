@@ -294,7 +294,7 @@ if __name__ == '__main__':
     # Run GA
     print("Running Genetic Algorithm")
     best_strategy = evolve_best_strategy(
-        pop_size=30,
+        pop_size=20,
         generations=50,
         rounds=200,
         mutation_rate=0.05,
