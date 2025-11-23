@@ -162,7 +162,7 @@ def evolve_best_strategy(pop_size=20, generations=50, rounds=200,
         history_avg.append(sum(fits) / pop_size)
         history_best.append(max(fits))
         
-        # Selection
+        # Selection based on their fitness (score)
         population.sort(key=lambda x: x['fitness'], reverse=True)
         elites = population[:elite_count]
         
