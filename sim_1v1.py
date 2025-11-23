@@ -24,7 +24,7 @@ class CASim(Model):
         self.moves_1 = []
         self.moves_2 = []
 
-        self.make_param('rounds', 10)
+        self.make_param('rounds', 100)
         self.make_param('strategy_1', 0, setter=self.setter_rule)
         self.make_param('strategy_2', 1, setter=self.setter_rule)
 
