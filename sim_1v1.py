@@ -142,7 +142,6 @@ class CASim(Model):
             return (prev_round[player] + prev_round[opponent]) % 2
         # 'Calculating', only cooperate with a cooperative opponent
         elif strat == 8:
-            print(len(other_moves))
             if len(other_moves) > 0:
                 avg = sum(other_moves) / len(other_moves)
                 if avg > 0.5:
