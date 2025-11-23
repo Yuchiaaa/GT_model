@@ -148,7 +148,7 @@ def evolve_best_strategy(pop_size=20, generations=50, rounds=200,
         # Evaluation
         for individual in population:
             current_score = 0
-            for fixed_name, fixed_gene in FIXED_ENV_STRATEGIES.items(): # play against all fixed strategies
+            for fixed_name, fixed_gene in FIXED_ENV_STRATEGIES.items(): # play against all original strategies
                 s_ind = play_game(individual['gene'], fixed_gene, rounds, payoff_table)
                 current_score += s_ind
             individual['fitness'] = current_score
