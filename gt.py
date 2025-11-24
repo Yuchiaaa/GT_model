@@ -284,37 +284,75 @@ if __name__ == '__main__':
     # cx = GUI(sim)
     # cx.start()
     
+    # Run and Visualize Tournament for Different Scenarios and Rounds
+    # Define the scenarios
     scenarios = {
-    "Standard": PAYOFF_TABLE, # T=5, R=3, P=1, S=0
-    
-    "High Temptation (T=8)": {
-        (0, 0): 3, (0, 1): 0, 
-        (1, 0): 8, (1, 1): 1 
-    },
-    
-    "Severe Punishment (P=0)": {
-        (0, 0): 3, (0, 1): 0, 
-        (1, 0): 5, (1, 1): 0 
+        "Standard": PAYOFF_TABLE,
+        "High Temptation": {
+            (0, 0): 3, (0, 1): 0, 
+            (1, 0): 8, (1, 1): 1 
+        },
+        "Severe Punishment": {
+            (0, 0): 3, (0, 1): 0, 
+            (1, 0): 5, (1, 1): 0 
         }
-    }   
-    
-    # Run tournament visualization
-    rounds = 300
-    for scenario_name, pt in scenarios.items():
-        print(f"Running Tournament: {scenario_name}")
+    }
+
+    # Settings
+    rounds = 300 # Tournament rounds
+    num_scenarios = len(scenarios)
+
+    # Create a figure with subplots (1 row, N columns)
+    fig, axes = plt.subplots(1, num_scenarios, figsize=(6 * num_scenarios, 6))
+
+    # If there is only 1 scenario, wrap axes in a list to make it iterable
+    if num_scenarios == 1:
+        axes = [axes]
+
+    print(f"Running Tournament Visualization for {num_scenarios} scenarios...")
+
+    # Loop through scenarios and plot on specific axis
+    for idx, (scenario_name, pt) in enumerate(scenarios.items()):
+        ax = axes[idx] # Get the specific subplot axis
+        
+        # Calculate Scores
         scores = run_tournament(FIXED_ENV_STRATEGIES, rounds=rounds, payoff_table=pt)
-        print("Tournament Scores:", scores)
+        print(f"Scores for {scenario_name}: {scores}")
+        
+        # Sort Data
+        sorted_scores = sorted(scores.items(), key=lambda item: item[1], reverse=True)
+        sorted_names = [item[0] for item in sorted_scores]
+        sorted_values = [item[1] for item in sorted_scores]
+        
+        # Plot Bars on the specific axis
+        colors = ['#FF5733' if i < 3 else '#33A1FF' for i in range(len(sorted_names))]
+        bars = ax.bar(sorted_names, sorted_values, color=colors)
+        
+        # Styling the Subplot
+        ax.set_title(f'{scenario_name}\n(t={rounds})')
+        ax.set_ylabel('Total Score')
+        # Rotate x-labels
+        ax.set_xticklabels(sorted_names, rotation=45, ha='right')
+        
+        # Add Value Labels on top of bars
+        for bar in bars:
+            yval = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2, yval, int(yval), 
+                    va='bottom', ha='center', fontsize=9)
+        
+    # Adjust layout to prevent overlap
+    plt.tight_layout()
+    plt.show()
         
         
     
-    
-    
+
     # Run GA
     print("Running Genetic Algorithm")
     best_strategy = evolve_best_strategy(
         pop_size=20,
         generations=50,
-        rounds=200,
+        rounds=300,
         mutation_rate=0.05,
         elite_count=5
     )
