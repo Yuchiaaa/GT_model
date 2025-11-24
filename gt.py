@@ -130,7 +130,7 @@ def run_and_visualize_tournament(strategies, rounds=300, payoff_table=PAYOFF_TAB
     plt.show()
     return scores
 
-def evolve_best_strategy(pop_size=20, generations=50, rounds=200, 
+def evolve_best_strategy(pop_size=20, generations=50, rounds=300, 
                          mutation_rate=0.05, elite_count=5, payoff_table=PAYOFF_TABLE, FIXED_ENV_STRATEGIES=FIXED_ENV_STRATEGIES):
     """
     Runs the genetic algorithm to evolve an optimal strategy against the fixed environment.
@@ -284,9 +284,22 @@ if __name__ == '__main__':
     # cx = GUI(sim)
     # cx.start()
     
+    scenarios = {
+    "Standard": PAYOFF_TABLE, # T=5, R=3, P=1, S=0
+    
+    "High Temptation (T=8)": {
+        (0, 0): 3, (0, 1): 0, 
+        (1, 0): 8, (1, 1): 1 
+    },
+    
+    "Severe Punishment (P=0)": {
+        (0, 0): 3, (0, 1): 0, 
+        (1, 0): 5, (1, 1): 0 
+        }
+    }   
     
     # Run tournament visualization
-    scores = run_and_visualize_tournament(FIXED_ENV_STRATEGIES, rounds=200)
+    scores = run_and_visualize_tournament(FIXED_ENV_STRATEGIES, rounds=300)
     print("Tournament Scores:", scores)
     
     # Run GA
