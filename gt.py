@@ -281,7 +281,7 @@ if __name__ == '__main__':
     }
 
     # Settings
-    rounds = 300 # Tournament rounds
+    rounds = 300 # Tournament rounds (changeable for experimentation)
     num_scenarios = len(scenarios)
 
     # Create a figure with subplots (1 row, N columns)
