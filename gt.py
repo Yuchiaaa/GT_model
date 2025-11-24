@@ -131,7 +131,7 @@ def run_and_visualize_tournament(strategies, rounds=300, payoff_table=PAYOFF_TAB
     return scores
 
 def evolve_best_strategy(pop_size=20, generations=50, rounds=200, 
-                         mutation_rate=0.05, elite_count=5, payoff_table=PAYOFF_TABLE):
+                         mutation_rate=0.05, elite_count=5, payoff_table=PAYOFF_TABLE, FIXED_ENV_STRATEGIES=FIXED_ENV_STRATEGIES):
     """
     Runs the genetic algorithm to evolve an optimal strategy against the fixed environment.
     Returns the best gene found.
@@ -187,7 +187,6 @@ def evolve_best_strategy(pop_size=20, generations=50, rounds=200,
 
 
 # CA Model for GUI
-
 class CASim(Model):
     def __init__(self):
         Model.__init__(self)
@@ -287,7 +286,8 @@ if __name__ == '__main__':
     
     
     # Run tournament visualization
-    run_and_visualize_tournament(FIXED_ENV_STRATEGIES, rounds=200)
+    scores = run_and_visualize_tournament(FIXED_ENV_STRATEGIES, rounds=200)
+    print("Tournament Scores:", scores)
     
     # Run GA
     print("Running Genetic Algorithm")
