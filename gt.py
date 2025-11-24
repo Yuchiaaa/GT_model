@@ -110,24 +110,6 @@ def run_tournament(strategies, rounds=300, payoff_table=PAYOFF_TABLE):
             scores[name_a] += s_a
             scores[name_b] += s_b
             
-    sorted_scores = sorted(scores.items(), key=lambda item: item[1], reverse=True)
-    sorted_names = [item[0] for item in sorted_scores]
-    sorted_values = [item[1] for item in sorted_scores]
-    
-    plt.figure(figsize=(10, 6))
-    colors = ['#FF5733' if i < 3 else '#33A1FF' for i in range(len(sorted_names))]
-    bars = plt.bar(sorted_names, sorted_values, color=colors)
-    plt.xlabel('Strategy')
-    plt.ylabel('Total Score')
-    plt.title(f'Tournament Results (t={rounds})')
-    plt.xticks(rotation=45, ha='right')
-    
-    for bar in bars:
-        yval = bar.get_height()
-        plt.text(bar.get_x() + bar.get_width()/2, yval, int(yval), va='bottom', ha='center', fontsize=8)
-    
-    plt.tight_layout()
-    plt.show()
     return scores
 
 def evolve_best_strategy(pop_size=20, generations=50, rounds=300, 
