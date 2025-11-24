@@ -93,7 +93,7 @@ def mutate(gene, rate):
     return new_gene
 
 # Function for tournament and visualization
-def run_and_visualize_tournament(strategies, rounds=300, payoff_table=PAYOFF_TABLE):
+def run_tournament(strategies, rounds=300, payoff_table=PAYOFF_TABLE):
     """
     Runs a tournament and plots the results.
     """
@@ -299,8 +299,15 @@ if __name__ == '__main__':
     }   
     
     # Run tournament visualization
-    scores = run_and_visualize_tournament(FIXED_ENV_STRATEGIES, rounds=300)
-    print("Tournament Scores:", scores)
+    rounds = 300
+    for scenario_name, pt in scenarios.items():
+        print(f"Running Tournament: {scenario_name}")
+        scores = run_tournament(FIXED_ENV_STRATEGIES, rounds=rounds, payoff_table=pt)
+        print("Tournament Scores:", scores)
+        
+        
+    
+    
     
     # Run GA
     print("Running Genetic Algorithm")
