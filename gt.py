@@ -67,7 +67,7 @@ def play_game(gene_a, gene_b, rounds, payoff_table=PAYOFF_TABLE):
         move_a = get_move(gene_a, hist_a, hist_b)
         move_b = get_move(gene_b, hist_b, hist_a)
         
-        score_a += PAYOFF_TABLE[(move_a, move_b)]
+        score_a += payoff_table[(move_a, move_b)]
         
         hist_a.append(move_a)
         hist_b.append(move_b)
