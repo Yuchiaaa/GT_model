@@ -12,7 +12,10 @@ import random
 import matplotlib.pyplot as plt
 import copy
 from pyics import Model, GUI
+import warnings
 
+# Ignore warnings triggered for ploting
+warnings.filterwarnings("ignore")
 
 # (A_action, B_action): A_payoff
 # 0 = Cooperate, 1 = Defect
