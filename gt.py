@@ -93,7 +93,7 @@ def mutate(gene, rate):
     return new_gene
 
 # Function for tournament and visualization
-def run_tournament(strategies, rounds=300, payoff_table=PAYOFF_TABLE):
+def run_tournament(strategies, rounds=200, payoff_table=PAYOFF_TABLE):
     """
     Runs a tournament and plots the results.
     """
@@ -112,7 +112,7 @@ def run_tournament(strategies, rounds=300, payoff_table=PAYOFF_TABLE):
             
     return scores
 
-def evolve_best_strategy(pop_size=20, generations=50, rounds=300, 
+def evolve_best_strategy(pop_size=20, generations=50, rounds=200, 
                          mutation_rate=0.05, elite_count=5, payoff_table=PAYOFF_TABLE, FIXED_ENV_STRATEGIES=FIXED_ENV_STRATEGIES):
     """
     Runs the genetic algorithm to evolve an optimal strategy against the fixed environment.
@@ -281,7 +281,7 @@ if __name__ == '__main__':
     }
 
     # Settings
-    rounds = 300 # Tournament rounds (changeable for experimentation)
+    rounds = 200 # Tournament rounds (changeable for experimentation)
     num_scenarios = len(scenarios)
 
     # Create a figure with subplots (1 row, N columns)
