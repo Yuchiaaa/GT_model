@@ -311,7 +311,7 @@ if __name__ == '__main__':
         
         # Plot Bars on the specific axis
         colors = ['#FF5733' if i < 3 else '#33A1FF' for i in range(len(sorted_names))]
-        bars = ax.bar(sorted_names, sorted_values, color=colors)
+        bars = ax.bar(list(sorted_names), list(sorted_values), color=colors)
         
         # Styling the Subplot
         ax.set_title(f'{scenario_name}\n(t={rounds})')
